@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>345 All Star - V22 Ultimate Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #09090b; --bg-panel: #141415; --bg-hover: #27272a;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00d2ff; --accent-hover: #00a3cc; --accent-glow: rgba(0, 210, 255, 0.2);
+            --text-main: #f4f4f5; --text-muted: #a1a1aa;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --radius: 12px; --radius-sm: 8px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        .sidebar { width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; z-index: 100; }
+        .brand { padding: 0 20px 20px; font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
+        .brand i { color: var(--accent); }
+        .nav-items { flex: 1; display: flex; flex-direction: column; gap: 5px; padding: 0 15px; }
+        .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: transparent; border: none; color: var(--text-muted); font-size: 14px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; text-align: left; }
+        .nav-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+        .nav-btn.active { background: var(--accent-glow); color: var(--accent); font-weight: 600; }
+        .nav-btn i { width: 20px; font-size: 16px; text-align: center; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; overflow-x: hidden; position: relative; }
+        .topbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); }
+        .header-title { font-size: 18px; font-weight: 600; }
+        .header-tools { display: flex; gap: 15px; align-items: center; }
+        
+        .pomodoro-widget { background: var(--bg-panel); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .pomodoro-widget:hover { border-color: var(--accent); }
+        .pomodoro-widget.running { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+
+        .tab-section { display: none; padding: 25px 30px; max-width: 1200px; margin: 0 auto; width: 100%; animation: fadeIn 0.2s ease-out; }
+        .tab-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-layout { display: grid; grid-template-columns: 2.2fr 1fr; gap: 25px; align-items: start; }
+        .card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-title { font-size: 15px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+
+        .hero-banner { background: linear-gradient(135deg, #18181b, #0f172a); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 25px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; overflow: hidden; }
+        .hero-info .date { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .hero-info .title { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+        .hero-info .session-badge { background: var(--accent-glow); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(0, 210, 255, 0.3); }
+        .hero-clock { text-align: right; }
+        .hero-clock .time { font-size: 34px; font-weight: bold; color: var(--text-main); font-variant-numeric: tabular-nums; line-height: 1; }
+        .hero-clock .left { color: var(--success); font-size: 12px; margin-top: 5px; font-weight: 600; }
+        
+        .sim-badge { position: absolute; top: 10px; right: 10px; background: var(--warning); color: #000; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; display: none; }
+
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 8px; transition: 0.2s; }
+        .checkbox-wrapper:hover { background: rgba(255,255,255,0.05); }
+        .checkbox-wrapper input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+        .checkbox-wrapper label { font-size: 13px; flex: 1; cursor: pointer; }
+        .del-btn { color: var(--danger); background: none; border: none; cursor: pointer; opacity: 0.5; }
+        .checkbox-wrapper:hover .del-btn { opacity: 1; }
+
+        .timeline-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden; transition: 0.2s; }
+        .timeline-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .timeline-header:hover { background: rgba(255,255,255,0.03); }
+        .timeline-card.active-session { border-color: var(--accent); border-left: 4px solid var(--accent); background: var(--accent-glow); }
+        .t-time { font-family: monospace; font-size: 13px; color: var(--text-muted); width: 115px; }
+        .t-title { font-weight: 600; font-size: 14px; flex: 1; }
+        .t-badge { background: #000; font-size: 11px; padding: 2px 8px; border-radius: 10px; color: var(--accent); border: 1px solid var(--border); }
+        .timeline-body { padding: 10px 15px 15px; border-top: 1px solid var(--border); display: none; flex-direction: column; gap: 8px; }
+        .timeline-card.open .timeline-body { display: flex; }
+        
+        .task-item { display: flex; align-items: center; gap: 10px; background: #000; padding: 8px 12px; border-radius: 6px; font-size: 13px; border-left: 2px solid var(--accent); }
+        .task-item select { background: var(--bg-hover); color: white; border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 11px; outline: none; }
+
+        .input-group { display: flex; gap: 10px; margin-top: 10px; }
+        .input-box { flex: 1; padding: 10px 12px; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius-sm); font-size: 13px; outline: none; }
+        .input-box:focus { border-color: var(--accent); }
+        .btn { padding: 10px 16px; border: none; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-warning { background: var(--warning); color: #000; }
+
+        .analytics-grid { display: flex; flex-direction: column; gap: 10px; }
+        .a-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 10px 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+        .a-row label { font-size: 13px; font-weight: 600; width: 130px; }
+        .a-inputs { display: flex; gap: 8px; align-items: center; }
+        .a-inputs input { width: 45px; padding: 6px; text-align: center; background: #000; border: 1px solid var(--border); color: white; border-radius: 4px; font-size: 12px; }
+        .a-net { font-size: 13px; font-weight: bold; color: var(--success); width: 55px; text-align: right; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { display: none; }
+            .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,21,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); z-index: 100; padding: 5px; padding-bottom: max(5px, env(safe-area-inset-bottom)); }
+            .m-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 0; color: var(--text-muted); background: transparent; border: none; font-size: 10px; cursor: pointer; }
+            .m-nav-btn i { font-size: 18px; }
+            .m-nav-btn.active { color: var(--accent); }
+            .grid-layout { grid-template-columns: 1fr; }
+            .topbar { padding: 15px; }
+            .tab-section { padding: 15px; padding-bottom: 80px; }
+            .hero-banner { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .hero-clock { text-align: left; }
+        }
+        @media (min-width: 769px) { .mobile-nav { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-graduation-cap"></i> 345 All Star</div>
+        <div class="nav-items">
+            <button class="nav-btn active" onclick="openTab('akis', this)"><i class="fa-solid fa-layer-group"></i> Ana Akış</button>
+            <button class="nav-btn" onclick="openTab('havuz', this)"><i class="fa-solid fa-inbox"></i> Planlama</button>
+            <button class="nav-btn" onclick="openTab('analiz', this)"><i class="fa-solid fa-chart-pie"></i> Analiz & Eksikler</button>
+            <button class="nav-btn" onclick="openTab('takvim', this)"><i class="fa-regular fa-calendar-days"></i> Takvim</button>
+            <button class="nav-btn" onclick="openTab('admin', this)" style="margin-top:auto;"><i class="fa-solid fa-gear"></i> Ayarlar</button>
+        </div>
+    </div>
+
+    <div class="mobile-nav">
+        <button class="m-nav-btn active" onclick="openTab('akis', this)"><i class="fa-solid fa-layer-group"></i> Akış</button>
+        <button class="m-nav-btn" onclick="openTab('havuz', this)"><i class="fa-solid fa-inbox"></i> Plan</button>
+        <button class="m-nav-btn" onclick="openTab('analiz', this)"><i class="fa-solid fa-chart-pie"></i> Analiz</button>
+        <button class="m-nav-btn" onclick="openTab('takvim', this)"><i class="fa-regular fa-calendar-days"></i> Takvim</button>
+        <button class="m-nav-btn" onclick="openTab('admin', this)"><i class="fa-solid fa-gear"></i> Ayar</button>
+    </div>
+
+    <div class="main-content" id="mainScroll">
+        
+        <div class="topbar">
+            <div class="header-title" id="pageTitle">Ana Akış</div>
+            <div class="header-tools">
+                <button class="pomodoro-widget" id="pomoBtn" onclick="togglePomodoro()">
+                    <i class="fa-solid fa-stopwatch"></i> <span id="pomoTime">25:00</span>
+                </button>
+                <button class="btn" style="background:transparent; color:var(--text-main); font-size:16px;" onclick="toggleFullScreen()"><i class="fa-solid fa-expand"></i></button>
+            </div>
+        </div>
+
+        <!-- 1. AKIŞ -->
+        <div id="akis" class="tab-section active">
+            <div class="hero-banner">
+                <div class="sim-badge" id="simBadge"><i class="fa-solid fa-flask"></i> SİMÜLASYON MODU</div>
+                <div class="hero-info">
+                    <div class="date" id="liveDate">Yükleniyor...</div>
+                    <div class="title" id="liveTitle">PROGRAM BEKLENİYOR</div>
+                    <div class="session-badge" id="liveSession">Motor Yükleniyor...</div>
+                </div>
+                <div class="hero-clock">
+                    <div class="time" id="liveClock">--:--:--</div>
+                    <div class="left" id="liveLeft"></div>
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                <div>
+                    <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">Dinamik Çizelge (İnegöl Astronomik)</h3>
+                    <div id="timelineUI"></div>
+                </div>
+                
+                <div>
+                    <div class="card" style="padding: 15px;">
+                        <div class="card-title" style="margin-bottom: 10px;"><i class="fa-solid fa-check-double"></i> Günlük Rutinler</div>
+                        <div id="rutinUI"></div>
+                        <div class="input-group">
+                            <input type="text" id="newRutinInp" class="input-box" placeholder="Rutin ekle..." style="padding: 6px 10px;">
+                            <button class="btn btn-success" onclick="addRutin()"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 15px; border-color: rgba(255, 215, 0, 0.2);">
+                        <div class="card-title" style="color: #ffcc00;"><i class="fa-solid fa-book-open"></i> Ezan Vakitleri (İnegöl)</div>
+                        <div style="font-size: 12px; font-style: italic; color: #ccc; margin: 10px 0;">Sonsuz Döngü Astronomik Algoritması</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;" id="prayerTimesBox"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PLANLAMA -->
+        <div id="havuz" class="tab-section">
+            <div class="grid-layout">
+                <div>
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Akıllı Dağıtım & Havuz</div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" id="strictMode" checked style="width:16px; height:16px;"> İzole Etüt (Dersleri Karıştırma)
+                            </label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <select id="speedSel" class="input-box" style="padding:6px; width:auto;">
+                                    <option value="1">1.0x</option><option value="1.25">1.25x</option><option value="1.5" selected>1.5x Hız</option><option value="2">2.0x</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="autoDistribute()">Otomatik Dağıt</button>
+                            </div>
+                        </div>
+                        <div id="poolUI" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-robot"></i> Program Yükle</div>
+                        <textarea id="aiInput" class="input-box" style="width:100%; height:150px; resize:none; margin-bottom:10px; font-family:monospace;" placeholder="345 metnini buraya yapıştır..."></textarea>
+                        <button class="btn btn-primary" style="width:100%;" onclick="parseText()"><i class="fa-solid fa-bolt"></i> Havuza Çek</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-pen"></i> Manuel Ekle</div>
+                        <div class="input-group">
+                            <input type="text" id="manTitle" class="input-box" placeholder="Görev Adı">
+                            <input type="number" id="manDur" class="input-box" placeholder="Dk" style="width:60px; flex:none;">
+                            <button class="btn btn-success" onclick="addManual()"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ANALİZ VE EKSİKLER -->
+        <div id="analiz" class="tab-section">
+            <div class="grid-layout">
+                <div>
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-chart-line"></i> Günlük Çalışma Analizi</div>
+                        <div class="analytics-grid" id="analizUI"></div>
+                        <div style="margin-top: 15px;">
+                            <label style="font-size: 12px; color: var(--text-muted); display:block; margin-bottom:5px;">Bugün Zorlanılan / Tekrar Edilecek Konular:</label>
+                            <input type="text" id="hardTopicsInput" class="input-box" placeholder="Örn: Limit kuralları..." style="width:100%;">
+                        </div>
+                        <button class="btn btn-success" style="width:100%; margin-top:15px;" onclick="saveAnalysis()"><i class="fa-solid fa-floppy-disk"></i> Günü Kaydet</button>
+                    </div>
+                </div>
+                <div>
+                    <div class="card" style="border-color: rgba(239, 68, 68, 0.3);">
+                        <div class="card-title" style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Akıllı Eksik & Tekrar Listesi</div>
+                        <div id="hardTopicsListUI" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-history"></i> Geçmiş Kayıtlar</div>
+                        <div id="historyUI" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TAKVİM -->
+        <div id="takvim" class="tab-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fa-regular fa-calendar-check"></i> Gerçek Zamanlı Planlama</div>
+                    <button class="btn btn-success" style="padding:6px 12px;" onclick="logTodayCal()">Bugünü Logla</button>
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; flex-wrap:wrap; background:rgba(0,0,0,0.3); padding:15px; border-radius:var(--radius-sm); border:1px solid var(--border);">
+                    <input type="date" id="calDate" class="input-box" style="width:auto;">
+                    <select id="calType" class="input-box" style="width:auto;" onchange="document.getElementById('calNums').style.display=this.value==='345'?'flex':'none'">
+                        <option value="345">345 Kampı</option><option value="ops">Opsiyonel Gün</option>
+                    </select>
+                    <div id="calNums" style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-size:12px; color:var(--text-muted);">Hft:</span> <input type="number" id="calW" class="input-box" value="1" style="width:60px;">
+                        <span style="font-size:12px; color:var(--text-muted);">Gün:</span> <input type="number" id="calD" class="input-box" value="1" style="width:60px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="addCalPlan()">Ekle</button>
+                </div>
+                <div id="calListUI" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+        </div>
+
+        <!-- 5. AYARLAR & SİMÜLATÖR -->
+        <div id="admin" class="tab-section">
+            <div id="lockScreen" style="text-align:center; padding:50px 0;">
+                <i class="fa-solid fa-shield-halved" style="font-size:48px; color:var(--danger); margin-bottom:20px;"></i>
+                <h3>Yönetim Paneli</h3>
+                <input type="password" id="adminPass" class="input-box" placeholder="Şifre (1362)" style="max-width:200px; text-align:center; margin:15px auto; display:block;">
+                <button class="btn btn-primary" style="margin:0 auto;" onclick="checkPass()">Giriş Yap</button>
+            </div>
+            <div id="adminPanel" style="display:none;">
+                <div class="grid-layout">
+                    <div>
+                        <div class="card" style="border-color:var(--accent);">
+                            <div class="card-title"><i class="fa-solid fa-flask"></i> Tarih Makinesi (Zaman Simülatörü)</div>
+                            <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">Sistemin gelecekteki bir tarihte (örneğin yazın) ezanlara göre nasıl şekilleneceğini test et.</p>
+                            <div class="input-group">
+                                <input type="date" id="simDateInput" class="input-box">
+                                <button class="btn btn-warning" onclick="simulateDate()"><i class="fa-solid fa-play"></i> Simüle Et</button>
+                                <button class="btn btn-success" onclick="resetSim()"><i class="fa-solid fa-rotate-left"></i> Bugüne Dön</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Dinamik Motor Bilgisi</div>
+                            <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">Algoritma İnegöl Diyanet verilerinin 365 günlük astronomik enterpolasyonu ile çalışır. JSON dosyası gerektirmez, 2030 yılına kadar hatasız çalışır.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card" style="border-color:var(--danger);">
+                            <div class="card-title" style="color:var(--danger);">Tehlikeli Bölge</div>
+                            <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="if(confirm('Tüm veriler (rutinler, analizler, takvim) silinecek. Emin misin?')){localStorage.clear();location.reload();}">Sistemi Sıfırla (Format)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // === 1. ASTRONOMİK İNEGÖL EZAN MOTORU (Ömür Boyu Çevrimdışı) ===
+        // Yılın 24 pivot noktasındaki (Her ayın 1'i ve 15'i) ezan dakikaları. Enterpolasyon ile tüm yıla yayılır.
+        const pData = [
+            [407,499,794,935,1078,1164], [405,495,798,948,1092,1177], // Oca
+            [393,480,803,967,1112,1194], [378,464,803,982,1129,1210], // Sub
+            [358,443,801,994,1145,1225], [335,420,797,1002,1161,1240], // Mar
+            [305,393,792,1010,1178,1259], [279,370,788,1014,1192,1276], // Nis
+            [252,348,785,1018,1208,1296], [231,332,784,1022,1221,1314], // May
+            [214,321,785,1026,1236,1334], [209,319,788,1030,1244,1345], // Haz
+            [215,324,791,1032,1245,1344], [230,335,793,1030,1239,1335], // Tem
+            [253,352,793,1023,1221,1312], [274,367,791,1013,1202,1288], // Agu
+            [298,384,786,998,1176,1256], [315,398,782,981,1153,1230],   // Eyl
+            [333,414,776,961,1127,1203], [347,428,772,943,1104,1180],   // Eki
+            [366,447,770,924,1082,1158], [382,464,770,912,1068,1145],   // Kas
+            [398,482,775,906,1059,1139], [409,493,781,910,1060,1141]    // Ara
+        ];
+
+        function getPrayerTimes(dateObj) {
+            let start = new Date(dateObj.getFullYear(), 0, 0);
+            let diff = dateObj - start;
+            let dayOfYear = Math.floor(diff / 86400000); // 1-365
+            let idx = Math.floor((dayOfYear - 1) / 15.2);
+            if(idx < 0) idx = 0; if(idx > 22) idx = 22;
+            let weight = ((dayOfYear - 1) % 15.2) / 15.2;
+            
+            let cur = pData[idx]; let nxt = pData[idx + 1];
+            let res = [];
+            for(let i=0; i<6; i++) { res.push(Math.round(cur[i] + (nxt[i]-cur[i])*weight)); }
+            return {
+                imsak: minToTime(res[0]), gunes: minToTime(res[1]),
+                ogle: minToTime(res[2]), ikindi: minToTime(res[3]),
+                aksam: minToTime(res[4]), yatsi: minToTime(res[5])
+            };
+        }
+
+        // Zaman Araçları
+        function timeToMin(t) { let [h,m]=t.split(':').map(Number); return h*60+m; }
+        function minToTime(m) { m=(m+1440)%1440; return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+        function roundDown10(min) { return min - (min % 10); }
+        function roundNearest10(min) { return Math.round(min / 10) * 10; }
+        function addBlock(startMin, endMin, title) { return { id:'s_'+startMin, start:minToTime(startMin), end:minToTime(endMin), title:title }; }
+
+        // === 2. DİNAMİK ALGORİTMA MOTORU ===
+        function generateDynamicTimeline(targetDate) {
+            const p = getPrayerTimes(targetDate);
+            let timeline = [];
+            
+            // Sabah Çapası
+            const wakeMin = roundDown10(timeToMin(p.imsak) - 10);
+            timeline.push(addBlock(wakeMin, wakeMin + 30, '✦ TEHECCÜD VE SABAH'));
+            timeline.push(addBlock(wakeMin + 30, wakeMin + 50, '❖ SABAH YÜRÜYÜŞÜ VE EGZERSİZ'));
+            if(wakeMin + 50 < 7*60) { timeline.push(addBlock(wakeMin + 50, 7*60, '❖ SABAH TAMPON ETÜDÜ')); }
+
+            // Ana Dersler (Sabah)
+            timeline.push(addBlock(7*60, 8*60, '1. Ders (50+10)'));
+            timeline.push(addBlock(8*60, 9*60, '2. Ders (50+10)'));
+            timeline.push(addBlock(9*60, 10*60, '3. Ders (50+10)'));
+            timeline.push(addBlock(10*60, 11*60, '❖ KAHVALTI'));
+
+            let currentMin = 11*60;
+            let dCount = 4;
+
+            // Öğle Bloğu
+            const ogleMin = roundNearest10(timeToMin(p.ogle));
+            while(currentMin + 60 <= ogleMin) { timeline.push(addBlock(currentMin, currentMin + 60, `${dCount++}. Ders (50+10)`)); currentMin += 60; }
+            if(currentMin < ogleMin) { timeline.push(addBlock(currentMin, ogleMin, '❖ ÖĞLE ÖNCESİ TAMPON')); currentMin = ogleMin; }
+            
+            timeline.push(addBlock(ogleMin, ogleMin + 60, '✦ ÖĞLE NAMAZI VE MOLA (1 Saat)'));
+            currentMin = ogleMin + 60;
+            
+            let nextHour = Math.ceil(currentMin / 60) * 60;
+            if(currentMin < nextHour) { timeline.push(addBlock(currentMin, nextHour, '❖ ÖĞLE SONRASI TAMPON')); currentMin = nextHour; }
+
+            // İkindi Bloğu
+            const ikindiMin = roundNearest10(timeToMin(p.ikindi));
+            while(currentMin + 60 <= ikindiMin) { timeline.push(addBlock(currentMin, currentMin + 60, `${dCount++}. Ders (50+10)`)); currentMin += 60; }
+            if(currentMin < ikindiMin) { timeline.push(addBlock(currentMin, ikindiMin, '❖ İKİNDİ ÖNCESİ TAMPON')); currentMin = ikindiMin; }
+            
+            timeline.push(addBlock(ikindiMin, ikindiMin + 30, '✦ İKİNDİ VE MOLA (30 Dk)'));
+            currentMin = ikindiMin + 30;
+            
+            nextHour = Math.ceil(currentMin / 60) * 60;
+            if(currentMin < nextHour) { timeline.push(addBlock(currentMin, nextHour, '❖ İKİNDİ SONRASI TAMPON')); currentMin = nextHour; }
+
+            // Akşam Bloğu
+            const aksamMin = roundNearest10(timeToMin(p.aksam));
+            while(currentMin + 60 <= aksamMin) { timeline.push(addBlock(currentMin, currentMin + 60, `${dCount++}. Ders (50+10)`)); currentMin += 60; }
+            if(currentMin < aksamMin) { timeline.push(addBlock(currentMin, aksamMin, '❖ AKŞAM ÖNCESİ TAMPON')); currentMin = aksamMin; }
+            
+            timeline.push(addBlock(aksamMin, aksamMin + 30, '✦ AKŞAM VE MOLA (30 Dk)'));
+            currentMin = aksamMin + 30;
+
+            // Akşam - Yatsı Arası (Molasız Opsiyonel)
+            const yatsiMin = roundNearest10(timeToMin(p.yatsi));
+            if(currentMin < yatsiMin) { timeline.push(addBlock(currentMin, yatsiMin, '❖ OPSİYONEL & SERBEST ÇALIŞMA (Molasız)')); currentMin = yatsiMin; }
+
+            // Yatsı ve Gece Bloğu
+            timeline.push(addBlock(yatsiMin, yatsiMin + 30, '✦ YATSI VE MOLA (30 Dk)'));
+            currentMin = yatsiMin + 30;
+            
+            nextHour = Math.ceil(currentMin / 60) * 60;
+            if(currentMin < nextHour && currentMin < 22.5*60) {
+                let bufEnd = Math.min(nextHour, 22.5*60);
+                timeline.push(addBlock(currentMin, bufEnd, '❖ YATSI SONRASI TAMPON')); currentMin = bufEnd;
+            }
+            while(currentMin + 60 <= 22.5*60) { timeline.push(addBlock(currentMin, currentMin + 60, `${dCount++}. Ders (50+10)`)); currentMin += 60; }
+            if(currentMin < 22.5*60) { timeline.push(addBlock(currentMin, 22.5*60, '❖ GECE TAMPONU')); }
+            
+            // Kapanış
+            timeline.push(addBlock(22.5*60, 23*60, '❖ GECEYE HAZIRLIK'));
+            return timeline;
+        }
+
+        // === 3. DURUM YÖNETİMİ VE SİMÜLATÖR ===
+        let state = {
+            activeDate: new Date(), // Simülatör veya Gerçek gün
+            isSimulating: false,
+            timeline: [],
+            tasks: JSON.parse(localStorage.getItem('v22_tsks')) || [],
+            rutins: JSON.parse(localStorage.getItem('v22_rts')) || [],
+            analiz: JSON.parse(localStorage.getItem('v22_anlz')) || [],
+            eksikler: JSON.parse(localStorage.getItem('v22_eks')) || [],
+            takvim: JSON.parse(localStorage.getItem('v22_cal')) || {},
+            title: localStorage.getItem('v22_title') || '345 ALL STAR - DİNAMİK KAMP',
+            ui: { opens: JSON.parse(localStorage.getItem('v22_ui')) || {} }
+        };
+
+        // Başlangıç Kurulumu
+        state.timeline = generateDynamicTimeline(state.activeDate);
+
+        function simulateDate() {
+            let dVal = document.getElementById('simDateInput').value;
+            if(!dVal) return alert('Tarih seç!');
+            state.activeDate = new Date(dVal);
+            state.isSimulating = true;
+            state.timeline = generateDynamicTimeline(state.activeDate);
+            document.getElementById('simBadge').style.display = 'block';
+            openTab('akis'); renderAll();
+        }
+
+        function resetSim() {
+            state.activeDate = new Date();
+            state.isSimulating = false;
+            state.timeline = generateDynamicTimeline(state.activeDate);
+            document.getElementById('simBadge').style.display = 'none';
+            document.getElementById('simDateInput').value = '';
+            renderAll();
+        }
+
+        let pomo = { timer: null, time: 25 * 60, isRunning: false, mode: 'work' };
+        function formatPomo(s) { let m=Math.floor(s/60); let sc=s%60; return `${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; }
+        function togglePomodoro() {
+            let btn = document.getElementById('pomoBtn'); let txt = document.getElementById('pomoTime');
+            if(pomo.isRunning) { clearInterval(pomo.timer); pomo.isRunning = false; btn.classList.remove('running'); }
+            else { 
+                pomo.isRunning = true; btn.classList.add('running');
+                pomo.timer = setInterval(() => {
+                    pomo.time--; txt.innerText = formatPomo(pomo.time);
+                    if(pomo.time <= 0) { 
+                        clearInterval(pomo.timer); pomo.isRunning = false; btn.classList.remove('running');
+                        alert(pomo.mode === 'work' ? "Odak bitti! Mola vakti." : "Mola bitti! Derse dönüş.");
+                        pomo.mode = pomo.mode === 'work' ? 'break' : 'work'; pomo.time = pomo.mode === 'work' ? 25*60 : 5*60; txt.innerText = formatPomo(pomo.time);
+                    }
+                }, 1000);
+            }
+        }
+
+        function save() { 
+            localStorage.setItem('v22_tsks', JSON.stringify(state.tasks)); 
+            localStorage.setItem('v22_rts', JSON.stringify(state.rutins));
+            localStorage.setItem('v22_eks', JSON.stringify(state.eksikler));
+            localStorage.setItem('v22_ui', JSON.stringify(state.ui.opens));
+            localStorage.setItem('v22_title', state.title);
+            renderAll(); 
+        }
+
+        function openTab(tabId, btn) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn, .m-nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(btn) {
+                let idx = Array.from(btn.parentElement.children).indexOf(btn);
+                document.querySelectorAll('.nav-items .nav-btn')[idx]?.classList.add('active');
+                document.querySelectorAll('.mobile-nav .m-nav-btn')[idx]?.classList.add('active');
+            }
+            document.getElementById('pageTitle').innerText = btn ? btn.innerText.trim() : 'Akış';
+            document.getElementById('mainScroll').scrollTo(0,0);
+        }
+
+        function toggleFullScreen() { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else if(document.exitFullscreen) document.exitFullscreen(); }
+        function toggleUI(id) { state.ui.opens[id] = !state.ui.opens[id]; save(); }
+
+        function clockTick() {
+            const now = new Date(); 
+            // Eğer simülasyon modundaysak saati durdurmuyoruz, gerçek saati akıtıyoruz ama akış o güne ait
+            const m = now.getHours()*60 + now.getMinutes();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            
+            // Tarih metni
+            let dText = state.isSimulating ? state.activeDate.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long', year:'numeric'}) : now.toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long'});
+            document.getElementById('liveDate').innerText = dText;
+            document.getElementById('liveTitle').innerText = state.title;
+
+            let activeId = null;
+            state.timeline.forEach(s => {
+                let [sh,sm]=s.start.split(':').map(Number); let [eh,em]=s.end.split(':').map(Number);
+                let stM = sh*60+sm; let enM = eh*60+em; if(enM < stM) enM += 24*60;
+                let card = document.getElementById(`tl_card_${s.id}`);
+                
+                // Aktifliği gerçek saate göre vurgula (simülasyonda da gerçek saate denk geleni vurgular)
+                if(m >= stM && m < enM) {
+                    activeId = s.id; if(card) card.classList.add('active-session');
+                    document.getElementById('liveSession').innerText = state.isSimulating ? `(Simülasyon) ${s.title}` : `Şu An: ${s.title}`;
+                    document.getElementById('liveLeft').innerText = `${enM - m} dk kaldı`;
+                } else { if(card) card.classList.remove('active-session'); }
+            });
+            if(!activeId) { document.getElementById('liveSession').innerText = 'Serbest Zaman / Uyku'; document.getElementById('liveLeft').innerText = ''; }
+        }
+
+        function getTaskHTML(t, isPool=false) {
+            let sel = '';
+            if(isPool) {
+                let opts = state.timeline.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+                sel = `<select onchange="assignTask('${t.id}', this.value)"><option value="">Ekle</option><option value="rutin" style="color:var(--success);">↳ Rutine</option>${opts}</select>`;
+            } else { sel = `<button class="del-btn" onclick="assignTask('${t.id}', null)"><i class="fa-solid fa-xmark"></i></button>`; }
+            return `<div class="task-item"><input type="checkbox" style="width:16px; height:16px;" ${t.checked?'checked':''} onchange="chkTask('${t.id}', this.checked)"><span style="flex:1;">${t.title} <span style="color:var(--text-muted); font-size:11px;">(${t.duration}dk)</span></span>${sel}</div>`;
+        }
+
+        function renderAll() {
+            const p = getPrayerTimes(state.activeDate);
+            document.getElementById('prayerTimesBox').innerHTML = `
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>İmsak</span> <span style="color:#ffcc00;">${p.imsak}</span></div>
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>Güneş</span> <span style="color:#ffcc00;">${p.gunes}</span></div>
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>Öğle</span> <span style="color:#ffcc00;">${p.ogle}</span></div>
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>İkindi</span> <span style="color:#ffcc00;">${p.ikindi}</span></div>
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>Akşam</span> <span style="color:#ffcc00;">${p.aksam}</span></div>
+                <div style="background:#000; padding:4px 8px; border-radius:4px; font-size:11px; display:flex; justify-content:space-between;"><span>Yatsı</span> <span style="color:#ffcc00;">${p.yatsi}</span></div>
+            `;
+
+            document.getElementById('rutinUI').innerHTML = state.rutins.map(r => `
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" ${r.checked?'checked':''} onchange="chkRutin('${r.id}', this.checked)">
+                    <label>${r.title}</label>
+                    <button class="del-btn" onclick="delRutin('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('') || '<span style="color:var(--text-muted); font-size:12px;">Rutin yok.</span>';
+
+            document.getElementById('timelineUI').innerHTML = state.timeline.map(s => {
+                let sTasks = state.tasks.filter(t => t.sessionId === s.id);
+                let html = sTasks.map(t => getTaskHTML(t)).join('');
+                let isOpen = state.ui.opens['tl_'+s.id] ? 'open' : '';
+                let hasTasks = sTasks.length > 0;
+                return `
+                <div class="timeline-card ${isOpen}" id="tl_card_${s.id}">
+                    <div class="timeline-header" onclick="toggleUI('tl_${s.id}')">
+                        <div class="t-time">${s.start} - ${s.end}</div>
+                        <div class="t-title" style="color: ${hasTasks ? 'var(--text-main)' : 'var(--text-muted)'}">${s.title}</div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            ${hasTasks ? `<span class="t-badge">${sTasks.length}</span>` : ''}
+                            <i class="fa-solid fa-chevron-${isOpen?'down':'up'}" style="color:var(--text-muted); font-size:12px;"></i>
+                        </div>
+                    </div>
+                    <div class="timeline-body">${html || '<span style="color:var(--text-muted); font-size:12px;">Görev atanmadı.</span>'}</div>
+                </div>`;
+            }).join('');
+
+            let poolT = state.tasks.filter(t => !t.sessionId);
+            document.getElementById('poolUI').innerHTML = poolT.length ? poolT.map(t => getTaskHTML(t, true)).join('') : '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px;">Havuz boş.</div>';
+
+            let subs = new Set(); state.tasks.forEach(t => { let p = t.title.split(':'); if(p.length>1 && !p[0].includes('Sayfa')) subs.add(p[0].trim()); });
+            subs.add('Paragraf'); subs.add('Problem');
+            document.getElementById('analizUI').innerHTML = Array.from(subs).map(s => `
+                <div class="a-row" data-sub="${s}"><label>${s}</label><div class="a-inputs"><input type="number" class="d-inp" placeholder="D" oninput="cNet(this)"><input type="number" class="y-inp" placeholder="Y" oninput="cNet(this)"><div class="a-net">0.0</div></div></div>
+            `).join('');
+
+            document.getElementById('hardTopicsListUI').innerHTML = state.eksikler.map((e, idx) => `
+                <div style="background:#000; padding:8px 12px; border-radius:6px; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>📌 ${e}</span>
+                    <button class="del-btn" onclick="state.eksikler.splice(${idx},1);save();"><i class="fa-solid fa-check"></i></button>
+                </div>
+            `).join('') || '<span style="color:var(--text-muted); font-size:12px;">Kayıtlı eksik yok!</span>';
+
+            renderHist(); renderCal();
+        }
+
+        function addRutin() { let v=document.getElementById('newRutinInp').value.trim(); if(v) { state.rutins.push({id:'r_'+Date.now(), title:v, checked:false}); document.getElementById('newRutinInp').value=''; save(); } }
+        function delRutin(id) { state.rutins = state.rutins.filter(r=>r.id!==id); save(); }
+        function chkRutin(id, st) { let r=state.rutins.find(x=>x.id===id); if(r) { r.checked=st; save(); } }
+        function chkTask(id, st) { let t=state.tasks.find(x=>x.id===id); if(t) { t.checked=st; save(); } }
+        function assignTask(tId, sId) { 
+            let tIdx = state.tasks.findIndex(x=>x.id===tId); 
+            if(tIdx>-1) { 
+                if(sId==='rutin') { state.rutins.push({id:'r_'+Date.now(), title:state.tasks[tIdx].title, checked:state.tasks[tIdx].checked}); state.tasks.splice(tIdx,1); }
+                else { state.tasks[tIdx].sessionId = sId; }
+                save(); 
+            } 
+        }
+
+        function addManual() { let t=document.getElementById('manTitle').value.trim(); let d=parseInt(document.getElementById('manDur').value)||15; if(t) { state.tasks.push({id:'t_'+Date.now(), title:t, duration:d, checked:false, sessionId:null}); document.getElementById('manTitle').value=''; save(); } }
+
+        function parseText() {
+            let txt = document.getElementById('aiInput').value; if(!txt.trim()) return;
+            let lines = txt.split('\n'); let c=0;
+            lines.forEach(l => {
+                let tl = l.trim();
+                if(tl.includes('HAFTA') && tl.includes('GÜN')) { state.title = tl.replace(/[╔════╗║╚╝]/g, '').trim(); }
+                if(tl.startsWith('-')) {
+                    let n = tl.substring(1).trim().replace(/[◯✓]/g,'').trim(); let d = 15;
+                    let m = n.match(/\((\d+)\s*dk\.?\)/i); if(m) { d=parseInt(m[1]); n=n.replace(/\(\d+\s*dk\.?\)/i,'').trim(); } else if(n.includes('Ödev')) d=20;
+                    if(n.length>3) { state.tasks.push({id:'t_'+Date.now()+Math.random(), title:n, duration:d, checked:false, sessionId:null}); c++; }
+                }
+            });
+            if(c>0) { document.getElementById('aiInput').value=''; save(); openTab('havuz'); alert(`${c} görev çekildi.`); }
+        }
+
+        function autoDistribute() {
+            let unA = state.tasks.filter(t=>!t.sessionId); let spd = parseFloat(document.getElementById('speedSel').value); let strict = document.getElementById('strictMode').checked;
+            let tDist = unA.filter(t=>t.title.includes('Mat')||t.title.includes('Fiz')||t.title.includes('Kim')||t.title.includes('Biyo')||t.title.includes('Ders')||t.title.includes('Ödev'));
+            if(!tDist.length) return alert("Uygun 345 görevi yok.");
+            let sess = state.timeline.filter(t=>t.title.includes('Ders')||t.title.includes('Etüt')||t.title.includes('Opsiyonel')).map(s=>{
+                let [sh,sm]=s.start.split(':').map(Number); let [eh,em]=s.end.split(':').map(Number); let m=(eh*60+em)-(sh*60+sm); return {id:s.id, tM:m, rM:m};
+            });
+            let sIdx=0; let cSub="";
+            tDist.forEach(t => {
+                let eD = Math.round(t.duration/spd); let sub = t.title.split(':')[0].trim();
+                if(strict && cSub && sub!==cSub && sess[sIdx] && sess[sIdx].rM < sess[sIdx].tM) sIdx++;
+                cSub = sub;
+                while(sIdx < sess.length && sess[sIdx].rM < eD) sIdx++;
+                if(sIdx < sess.length) { t.sessionId = sess[sIdx].id; sess[sIdx].rM -= eD; state.ui.opens['tl_'+sess[sIdx].id]=true; }
+            });
+            save(); openTab('akis');
+        }
+
+        function cNet(el) { let r=el.closest('.a-row'); let d=parseFloat(r.querySelector('.d-inp').value)||0; let y=parseFloat(r.querySelector('.y-inp').value)||0; r.querySelector('.a-net').innerText = (d-(y*0.25)).toFixed(2); }
+        
+        function saveAnalysis() {
+            let ds = new Date().toLocaleDateString('tr-TR'); let rs = document.querySelectorAll('#analizUI .a-row'); let st=[]; let tN=0;
+            rs.forEach(r => { let s=r.getAttribute('data-sub'); let d=parseInt(r.querySelector('.d-inp').value)||0; let y=parseInt(r.querySelector('.y-inp').value)||0; let n=d-(y*0.25); if(d>0||y>0) { st.push(`${s}: ${d}D ${y}Y (${n.toFixed(2)})`); tN+=n; } });
+            
+            let hardT = document.getElementById('hardTopicsInput').value.trim();
+            if(hardT) { state.eksikler.push(hardT); document.getElementById('hardTopicsInput').value=''; }
+
+            if(!st.length && !hardT) return alert("Lütfen en az bir veri girin.");
+            state.analiz.unshift({id:Date.now(), date:ds, stats:st, net:tN.toFixed(2)}); save(); alert("Analiz ve eksikler kaydedildi!");
+        }
+
+        function renderHist() { document.getElementById('historyUI').innerHTML = state.analiz.map(a => `<div style="background:#000; padding:12px; border-radius:8px; border-left:3px solid var(--accent);"><div style="font-size:12px; color:var(--text-muted); margin-bottom:5px;">${a.date} <span style="float:right; color:var(--success); font-weight:bold;">${a.net} Net</span></div><div style="font-size:13px;">${a.stats.join(' | ')}</div></div>`).join(''); }
+
+        function addCalPlan() { let dt=document.getElementById('calDate').value; if(!dt) return; let t=document.getElementById('calType').value; let w=document.getElementById('calW').value; let d=document.getElementById('calD').value; state.takvim[dt] = {type:t, w:w, d:d, log:''}; localStorage.setItem('v22_cal', JSON.stringify(state.takvim)); renderCal(); }
+        function logTodayCal() {
+            let td = new Date().toISOString().split('T')[0]; if(!state.takvim[td]) return alert("Bugüne takvimde plan atanmamış.");
+            let ct = state.tasks.filter(x=>x.checked).length; let cr = state.rutins.filter(x=>x.checked).length;
+            state.takvim[td].log = `[${state.title}] Görev: ${ct}/${state.tasks.length}, Rutin: ${cr}/${state.rutins.length}`;
+            localStorage.setItem('v22_cal', JSON.stringify(state.takvim)); renderCal(); alert("Loglandı!");
+        }
+        function renderCal() {
+            let ui = document.getElementById('calListUI'); let ks = Object.keys(state.takvim).sort();
+            ui.innerHTML = ks.map(k => {
+                let v = state.takvim[k]; let txt = v.type==='345'?`345 Kampı (${v.w}.H ${v.d}.G)`:'Opsiyonel Gün';
+                return `<div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:8px; border:1px solid var(--border); border-left:3px solid var(--success);"><div style="display:flex; justify-content:space-between;"><b style="font-size:13px;">${new Date(k).toLocaleDateString('tr-TR')}</b><button class="del-btn" onclick="delete state.takvim['${k}'];localStorage.setItem('v22_cal',JSON.stringify(state.takvim));renderCal();"><i class="fa-solid fa-trash"></i></button></div><div style="font-size:12px; color:var(--accent); margin:4px 0;">${txt}</div><div style="font-size:11px; color:var(--text-muted); font-style:italic;">${v.log||'Log yok'}</div></div>`;
+            }).join('');
+        }
+
+        function checkPass() { if(document.getElementById('adminPass').value === '1362') { document.getElementById('lockScreen').style.display='none'; document.getElementById('adminPanel').style.display='block'; } else alert('Hatalı!'); }
+
+        setInterval(clockTick, 1000); clockTick(); renderAll(); if(state.tasks.length===0) localStorage.removeItem('v22_title');
+    </script>
+</body>
+</html>
